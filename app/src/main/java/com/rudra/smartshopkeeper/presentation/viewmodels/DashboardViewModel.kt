@@ -39,6 +39,7 @@ class DashboardViewModel @Inject constructor(
                 val todayExpenses = expenseRepository.getTotalExpensesBetweenDates(todayStart, todayEnd) ?: 0.0
                 val totalDue = customerRepository.getTotalDue()
                 val lowStockProducts = productRepository.getLowStockProducts().first()
+                val expiredProducts = productRepository.getExpiredProducts(todayEnd).first()
                 val todayProfit = calculateTodayProfit(todayStart, todayEnd)
 
                 _state.update {
@@ -47,6 +48,7 @@ class DashboardViewModel @Inject constructor(
                         todayExpenses = todayExpenses,
                         totalDue = totalDue,
                         lowStockProducts = lowStockProducts,
+                        expiredProducts = expiredProducts,
                         todayProfit = todayProfit,
                         isLoading = false
                     )
@@ -91,6 +93,7 @@ data class DashboardState(
     val todayExpenses: Double = 0.0,
     val totalDue: Double = 0.0,
     val lowStockProducts: List<Product> = emptyList(),
+    val expiredProducts: List<Product> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null
 )

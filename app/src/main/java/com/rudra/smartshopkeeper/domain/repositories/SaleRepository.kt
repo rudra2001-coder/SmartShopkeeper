@@ -13,4 +13,10 @@ interface SaleRepository {
     suspend fun getSaleItemsBetweenDates(startDate: Long, endDate: Long): List<SaleItem>
     suspend fun getTotalSalesBetweenDates(startDate: Long, endDate: Long): Double?
     suspend fun getTotalPaidBetweenDates(startDate: Long, endDate: Long): Double?
+    suspend fun getTotalCostOfGoodsSold(startDate: Long, endDate: Long): Double?
+    suspend fun getSaleItems(saleId: Long): List<SaleItem>
+    fun searchSales(invoiceNumber: String): Flow<List<Sale>>
+    fun getSalesForCustomer(customerId: String): Flow<List<Sale>>
+    suspend fun getProfitPerProduct(startDate: Long, endDate: Long): Map<String, Double>
+    suspend fun getProfitPerCategory(startDate: Long, endDate: Long): Map<String, Double>
 }

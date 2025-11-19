@@ -25,7 +25,11 @@ import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material.icons.filled.Receipt
+import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.AssignmentReturn
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,11 +63,14 @@ fun DashboardScreen(
     onNavigateToSales: () -> Unit,
     onNavigateToProducts: () -> Unit,
     onNavigateToCustomers: () -> Unit,
+    onNavigateToSuppliers: () -> Unit,
     onNavigateToExpenses: () -> Unit,
-    onNavigateToReports: () -> Unit
+    onNavigateToReports: () -> Unit,
+    onNavigateToAddPurchase: () -> Unit,
+    onNavigateToSaleReturn: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
-    
+
     LaunchedEffect(Unit) {
         viewModel.loadDashboardData()
     }
@@ -178,6 +185,18 @@ fun DashboardScreen(
                             icon = Icons.Default.AddShoppingCart
                         )
                         
+                        BigActionButton(
+                            text = "নতুন ক্রয়",
+                            onClick = onNavigateToAddPurchase,
+                            icon = Icons.Default.ShoppingCart
+                        )
+
+                        BigActionButton(
+                            text = "পণ্য ফেরত",
+                            onClick = onNavigateToSaleReturn,
+                            icon = Icons.Default.AssignmentReturn
+                        )
+
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
@@ -196,17 +215,30 @@ fun DashboardScreen(
                                 backgroundColor = Color(0xFFFF9800)
                             )
                         }
-                        
+
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            BigActionButton(
+                             BigActionButton(
+                                text = "সরবরাহকারী",
+                                onClick = onNavigateToSuppliers,
+                                modifier = Modifier.weight(1f),
+                                icon = Icons.Default.LocalShipping,
+                                backgroundColor = Color(0xFF4CAF50)
+                            )
+                             BigActionButton(
                                 text = "খরচ",
                                 onClick = onNavigateToExpenses,
                                 modifier = Modifier.weight(1f),
                                 icon = Icons.Default.Receipt,
                                 backgroundColor = Color(0xFF9C27B0)
                             )
+                        }
+                        
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                           
                             BigActionButton(
                                 text = "রিপোর্ট",
                                 onClick = onNavigateToReports,
@@ -222,6 +254,12 @@ fun DashboardScreen(
             if (state.lowStockProducts.isNotEmpty()) {
                 item {
                     LowStockAlertSection(products = state.lowStockProducts)
+                }
+            }
+
+            if (state.expiredProducts.isNotEmpty()) {
+                item {
+                    ExpiredProductAlertSection(products = state.expiredProducts)
                 }
             }
         }
@@ -264,6 +302,57 @@ fun LowStockAlertSection(products: List<Product>) {
             products.take(3).forEach { product ->
                 BengaliText(
                     text = "• ${product.name} - ${product.stockQty} ${product.unit}",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+            if (products.size > 3) {
+                BengaliText(
+                    text = "এবং আরও ${products.size - 3}টি পণ্য...",
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ExpiredProductAlertSection(products: List<Product>) {
+    Card(
+        modifier = Modifier
+            .padding(16.dp)
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFFFFEBEE)
+        ),
+        border = BorderStroke(1.dp, Color(0xFFF44336))
+    ) {
+        Column(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Error,
+                    contentDescription = null,
+                    tint = Color(0xFFD32F2F),
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                BengaliText(
+                    text = "মেয়াদোত্তীর্ণ পণ্য",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFFD32F2F)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            products.take(3).forEach { product ->
+                BengaliText(
+                    text = "• ${product.name}",
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurface
                 )

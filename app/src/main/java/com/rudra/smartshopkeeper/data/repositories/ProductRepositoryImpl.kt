@@ -18,4 +18,5 @@ class ProductRepositoryImpl @Inject constructor(
     override suspend fun decreaseStock(productId: String, quantity: Double) = productDao.decreaseStock(productId, quantity)
     override suspend fun increaseStock(productId: String, quantity: Double) = productDao.increaseStock(productId, quantity)
     override fun getLowStockProducts(): Flow<List<Product>> = productDao.getLowStockProducts()
+    override fun getExpiredProducts(date: Long): Flow<List<Product>> = productDao.getExpiredProducts(date)
 }

@@ -19,5 +19,6 @@ data class Product(
     val barcode: String? = null,
     val isActive: Boolean = true,
     val createdAt: Long = System.currentTimeMillis(),
-    val updatedAt: Long = System.currentTimeMillis()
+    val updatedAt: Long = System.currentTimeMillis(),
+    val expiryDate: Long? = null
 )

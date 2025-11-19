@@ -31,4 +31,13 @@ interface SaleDao {
     
     @Query("SELECT SUM(paidAmount) FROM sales WHERE date BETWEEN :startDate AND :endDate")
     suspend fun getTotalPaidBetweenDates(startDate: Long, endDate: Long): Double?
+
+    @Query("SELECT * FROM sale_items WHERE saleId = :saleId")
+    suspend fun getSaleItems(saleId: Long): List<SaleItem>
+
+    @Query("SELECT * FROM sales WHERE invoiceNumber LIKE '%' || :invoiceNumber || '%'")
+    fun searchSales(invoiceNumber: String): Flow<List<Sale>>
+
+    @Query("SELECT * FROM sales WHERE customerId = :customerId ORDER BY date DESC")
+    fun getSalesForCustomer(customerId: String): Flow<List<Sale>>
 }

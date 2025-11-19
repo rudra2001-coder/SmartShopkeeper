@@ -13,6 +13,7 @@ data class Customer(
     val address: String? = null,
     val totalDue: Double = 0.0,
     val totalPurchase: Double = 0.0,
+    val totalPaid: Double = 0.0,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
