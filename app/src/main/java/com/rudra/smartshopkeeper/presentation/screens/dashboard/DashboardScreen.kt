@@ -26,22 +26,30 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.PointOfSale
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.LocalShipping
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.AssignmentReturn
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -70,6 +78,7 @@ fun DashboardScreen(
     onNavigateToSaleReturn: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
+    var showMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.loadDashboardData()
@@ -87,8 +96,47 @@ fun DashboardScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                actions = {
+                    IconButton(onClick = { showMenu = !showMenu }) {
+                        Icon(Icons.Default.MoreVert, contentDescription = "Menu")
+                    }
+                    DropdownMenu(
+                        expanded = showMenu,
+                        onDismissRequest = { showMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { BengaliText(text = "সরবরাহকারী") },
+                            onClick = {
+                                onNavigateToSuppliers()
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { BengaliText(text = "খরচ") },
+                            onClick = {
+                                onNavigateToExpenses()
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { BengaliText(text = "নতুন ক্রয়") },
+                            onClick = {
+                                onNavigateToAddPurchase()
+                                showMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { BengaliText(text = "পণ্য ফেরত") },
+                            onClick = {
+                                onNavigateToSaleReturn()
+                                showMenu = false
+                            }
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -127,13 +175,13 @@ fun DashboardScreen(
             }
 
             item {
-                 LazyVerticalGrid(
+                LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     modifier = Modifier.padding(horizontal = 16.dp).height(200.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    item { 
+                    item {
                         StatCard(
                             title = "আজকের বিক্রয়",
                             value = "৳ ${state.todaySales}",
@@ -184,7 +232,7 @@ fun DashboardScreen(
                             onClick = onNavigateToSales,
                             icon = Icons.Default.AddShoppingCart
                         )
-                        
+
                         BigActionButton(
                             text = "নতুন ক্রয়",
                             onClick = onNavigateToAddPurchase,
@@ -219,14 +267,14 @@ fun DashboardScreen(
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                             BigActionButton(
+                            BigActionButton(
                                 text = "সরবরাহকারী",
                                 onClick = onNavigateToSuppliers,
                                 modifier = Modifier.weight(1f),
                                 icon = Icons.Default.LocalShipping,
                                 backgroundColor = Color(0xFF4CAF50)
                             )
-                             BigActionButton(
+                            BigActionButton(
                                 text = "খরচ",
                                 onClick = onNavigateToExpenses,
                                 modifier = Modifier.weight(1f),
@@ -234,11 +282,11 @@ fun DashboardScreen(
                                 backgroundColor = Color(0xFF9C27B0)
                             )
                         }
-                        
+
                         Row(
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                           
+
                             BigActionButton(
                                 text = "রিপোর্ট",
                                 onClick = onNavigateToReports,
@@ -250,7 +298,7 @@ fun DashboardScreen(
                     }
                 }
             }
-            
+
             if (state.lowStockProducts.isNotEmpty()) {
                 item {
                     LowStockAlertSection(products = state.lowStockProducts)
