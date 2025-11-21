@@ -34,4 +34,7 @@ interface ProductDao {
     
     @Query("SELECT * FROM products WHERE stockQty <= minStockAlert AND isActive = 1")
     fun getLowStockProducts(): Flow<List<Product>>
+
+    @Query("SELECT * FROM products WHERE expiryDate IS NOT NULL AND expiryDate <= :date")
+    fun getExpiredProducts(date: Long): Flow<List<Product>>
 }

@@ -3,7 +3,6 @@ package com.rudra.smartshopkeeper.presentation.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -40,12 +38,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rudra.smartshopkeeper.data.database.entities.CartItem
 import com.rudra.smartshopkeeper.data.database.entities.Customer
 import com.rudra.smartshopkeeper.data.database.entities.Product
 import com.rudra.smartshopkeeper.presentation.components.BengaliSearchBar
 import com.rudra.smartshopkeeper.presentation.components.BengaliText
 import com.rudra.smartshopkeeper.presentation.components.CustomerSelectionDialog
-import com.rudra.smartshopkeeper.presentation.viewmodels.CartItem
 import com.rudra.smartshopkeeper.presentation.viewmodels.NewSaleViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -118,19 +116,21 @@ fun NewSaleScreen(
                 searchQuery = state.searchQuery,
                 onSearchQueryChange = { viewModel.onSearchQueryChange(it) },
                 searchResults = state.searchResults,
-                onProductSelect = { viewModel.onProductAddedToCart(it) }
+                onProductSelect = { viewModel.onAddToCart(it) }
             )
 
             CartItemsSection(
                 cartItems = state.cartItems,
                 onQuantityChange = { product, quantity -> 
-                    viewModel.onCartItemQuantityChanged(product, quantity) 
+                    viewModel.onQuantityChange(product, quantity) 
                 },
-                onRemoveItem = { viewModel.onCartItemRemoved(it) }
+                onRemoveItem = { viewModel.onRemoveFromCart(it) }
             )
         }
     }
 }
+
+
 
 @Composable
 fun CustomerSelectionSection(
@@ -194,7 +194,7 @@ fun ProductListItem(product: Product, onProductSelect: (Product) -> Unit) {
 @Composable
 fun CartItemsSection(
     cartItems: List<CartItem>,
-    onQuantityChange: (CartItem, Int) -> Unit,
+    onQuantityChange: (CartItem, Double) -> Unit,
     onRemoveItem: (CartItem) -> Unit
 ) {
     LazyColumn(modifier = Modifier.padding(16.dp)) {
@@ -207,7 +207,7 @@ fun CartItemsSection(
 @Composable
 fun CartListItem(
     cartItem: CartItem,
-    onQuantityChange: (CartItem, Int) -> Unit,
+    onQuantityChange: (CartItem, Double) -> Unit,
     onRemoveItem: (CartItem) -> Unit
 ) {
     Row(
@@ -222,11 +222,11 @@ fun CartListItem(
             BengaliText(text = "৳${cartItem.product.salePrice}", fontSize = 14.sp)
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { onQuantityChange(cartItem, cartItem.quantity - 1) }) {
+            IconButton(onClick = { onQuantityChange(cartItem, cartItem.quantity - 1.0) }) {
                 Icon(Icons.Default.Remove, contentDescription = "Remove")
             }
             BengaliText(text = cartItem.quantity.toString(), modifier = Modifier.padding(horizontal = 8.dp))
-            IconButton(onClick = { onQuantityChange(cartItem, cartItem.quantity + 1) }) {
+            IconButton(onClick = { onQuantityChange(cartItem, cartItem.quantity + 1.0) }) {
                 Icon(Icons.Default.Add, contentDescription = "Add")
             }
             IconButton(onClick = { onRemoveItem(cartItem) }) {
@@ -283,4 +283,3 @@ fun SaleBottomBar(
         }
     }
 }
-

@@ -1,6 +1,7 @@
 
 package com.rudra.smartshopkeeper.presentation.screens.sales
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,16 +10,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,6 +33,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,19 +43,36 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.rudra.smartshopkeeper.data.database.entities.CartItem
 import com.rudra.smartshopkeeper.data.database.entities.Customer
 import com.rudra.smartshopkeeper.data.database.entities.Product
 import com.rudra.smartshopkeeper.presentation.components.BengaliSearchBar
 import com.rudra.smartshopkeeper.presentation.components.BengaliText
+import com.rudra.smartshopkeeper.presentation.components.CustomerSelectionDialog
+import com.rudra.smartshopkeeper.presentation.viewmodels.NewSaleViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NewSaleScreen(
     viewModel: NewSaleViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onNavigateToAddCustomer: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    var showCustomerDialog by remember { mutableStateOf(false) }
+
+    if (showCustomerDialog) {
+        CustomerSelectionDialog(
+            customers = state.customers,
+            onCustomerSelected = {
+                viewModel.onCustomerSelected(it)
+                showCustomerDialog = false
+            },
+            onDismiss = { showCustomerDialog = false },
+            onAddNewCustomer = onNavigateToAddCustomer
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -60,7 +86,7 @@ fun NewSaleScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "পিছনে")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "পিছনে")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -75,9 +101,10 @@ fun NewSaleScreen(
                 totalAmount = state.cartTotal,
                 onCompleteSale = {
                     viewModel.completeSale(context)
-                    onBack()
                 },
-                isValid = state.cartItems.isNotEmpty()
+                isValid = state.cartItems.isNotEmpty(),
+                isSaleCompleted = state.isSaleCompleted,
+                onPrintInvoice = { viewModel.printInvoice(context) }
             )
         }
     ) { padding ->
@@ -86,62 +113,129 @@ fun NewSaleScreen(
                 .padding(padding)
                 .fillMaxSize()
         ) {
-            CustomerSelectionSection(selectedCustomer = state.selectedCustomer, onCustomerSelect = viewModel::onCustomerSelected, onAddNewCustomer = { /*TODO*/ })
-            ProductSelectionSection(searchQuery = state.searchQuery, onSearchQueryChange = viewModel::onSearchQueryChange, searchResults = state.searchResults, onProductSelect = viewModel::onAddToCart)
-            CartItemsSection(cartItems = state.cartItems, onQuantityChange = viewModel::onQuantityChange, onRemoveItem = viewModel::onRemoveFromCart)
-            PaymentSummarySection(subtotal = state.subtotal, discount = state.discount, tax = state.tax, total = state.cartTotal)
+            CustomerSelectionSection(
+                selectedCustomer = state.selectedCustomer,
+                onSelectCustomerClick = { showCustomerDialog = true }
+            )
 
+            ProductSelectionSection(
+                searchQuery = state.searchQuery,
+                onSearchQueryChange = { viewModel.onSearchQueryChange(it) },
+                searchResults = state.searchResults,
+                onProductSelect = { viewModel.onAddToCart(it) }
+            )
+
+            CartItemsSection(
+                cartItems = state.cartItems,
+                onQuantityChange = { cartItem, quantity -> 
+                    viewModel.onQuantityChange(cartItem, quantity) 
+                },
+                onRemoveItem = { viewModel.onRemoveFromCart(it) }
+            )
         }
     }
 }
 
 @Composable
-fun CustomerSelectionSection(selectedCustomer: Customer?, onCustomerSelect: (Customer) -> Unit, onAddNewCustomer: () -> Unit) {
-    // TODO: Implement Customer Selection UI
+fun CustomerSelectionSection(
+    selectedCustomer: Customer?,
+    onSelectCustomerClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        if (selectedCustomer != null) {
+            BengaliText(text = "গ্রাহক: ${selectedCustomer.name}")
+        } else {
+            BengaliText(text = "গ্রাহক নির্বাচন করুন")
+        }
+        OutlinedButton(onClick = onSelectCustomerClick) {
+            BengaliText(text = "নির্বাচন")
+        }
+    }
 }
 
 @Composable
-fun ProductSelectionSection(searchQuery: String, onSearchQueryChange: (String) -> Unit, searchResults: List<Product>, onProductSelect: (Product) -> Unit) {
-    Column(modifier = Modifier.padding(16.dp)) {
+fun ProductSelectionSection(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    searchResults: List<Product>,
+    onProductSelect: (Product) -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         BengaliSearchBar(query = searchQuery, onQueryChange = onSearchQueryChange)
         LazyColumn {
             items(searchResults) { product ->
-                Text(text = product.name, modifier = Modifier.padding(8.dp))
+                ProductListItem(product = product, onProductSelect = onProductSelect)
             }
         }
     }
 }
 
 @Composable
-fun CartItemsSection(cartItems: Map<Product, Double>, onQuantityChange: (Product, Double) -> Unit, onRemoveItem: (Product) -> Unit) {
+fun ProductListItem(product: Product, onProductSelect: (Product) -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column {
+            BengaliText(text = product.name, fontWeight = FontWeight.Bold)
+            BengaliText(text = "৳${product.salePrice}", fontSize = 14.sp)
+        }
+        Button(onClick = { onProductSelect(product) }) {
+            BengaliText(text = "যোগ করুন")
+        }
+    }
+}
+
+@Composable
+fun CartItemsSection(
+    cartItems: List<CartItem>,
+    onQuantityChange: (CartItem, Double) -> Unit,
+    onRemoveItem: (CartItem) -> Unit
+) {
     LazyColumn(modifier = Modifier.padding(16.dp)) {
-        items(cartItems.keys.toList()) { product ->
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                Text(text = product.name)
-                Text(text = "${cartItems[product]}")
-            }
+        items(cartItems) { cartItem ->
+            CartListItem(cartItem = cartItem, onQuantityChange = { onQuantityChange(cartItem, it) }, onRemoveItem = onRemoveItem)
         }
     }
 }
 
 @Composable
-fun PaymentSummarySection(subtotal: Double, discount: Double, tax: Double, total: Double) {
-    Column(modifier = Modifier.padding(16.dp)) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Subtotal")
-            Text(text = "$subtotal")
+fun CartListItem(
+    cartItem: CartItem,
+    onQuantityChange: (Double) -> Unit,
+    onRemoveItem: (CartItem) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            BengaliText(text = cartItem.product.name, fontWeight = FontWeight.Bold)
+            BengaliText(text = "৳${cartItem.product.salePrice}", fontSize = 14.sp)
         }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Discount")
-            Text(text = "$discount")
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Tax")
-            Text(text = "$tax")
-        }
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-            Text(text = "Total")
-            Text(text = "$total")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = { onQuantityChange(cartItem.quantity - 1) }) {
+                Icon(Icons.Default.Remove, contentDescription = "Remove")
+            }
+            BengaliText(text = cartItem.quantity.toString(), modifier = Modifier.padding(horizontal = 8.dp))
+            IconButton(onClick = { onQuantityChange(cartItem.quantity + 1) }) {
+                Icon(Icons.Default.Add, contentDescription = "Add")
+            }
+            IconButton(onClick = { onRemoveItem(cartItem) }) {
+                Icon(Icons.Default.Delete, contentDescription = "Remove")
+            }
         }
     }
 }
@@ -150,7 +244,9 @@ fun PaymentSummarySection(subtotal: Double, discount: Double, tax: Double, total
 fun SaleBottomBar(
     totalAmount: Double,
     onCompleteSale: () -> Unit,
-    isValid: Boolean
+    isValid: Boolean,
+    isSaleCompleted: Boolean,
+    onPrintInvoice: () -> Unit
 ) {
     Surface(
         tonalElevation = 8.dp
@@ -169,26 +265,39 @@ fun SaleBottomBar(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 BengaliText(
-                    text = "৳ ${String.format("%.2f", totalAmount)}",
+                    text = "৳ ${"%.2f".format(totalAmount)}",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
             
-            Button(
-                onClick = onCompleteSale,
-                enabled = isValid,
-                modifier = Modifier.height(50.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary
-                )
-            ) {
-                BengaliText(
-                    text = "বিক্রয় সম্পন্ন",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+            if (isSaleCompleted) {
+                Button(
+                    onClick = onPrintInvoice,
+                    modifier = Modifier.height(50.dp),
+                ) {
+                    BengaliText(
+                        text = "ইনভয়েস প্রিন্ট",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            } else {
+                Button(
+                    onClick = onCompleteSale,
+                    enabled = isValid,
+                    modifier = Modifier.height(50.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    )
+                ) {
+                    BengaliText(
+                        text = "বিক্রয় সম্পন্ন",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
             }
         }
     }

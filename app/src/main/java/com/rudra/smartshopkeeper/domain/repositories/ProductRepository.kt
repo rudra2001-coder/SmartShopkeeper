@@ -13,4 +13,5 @@ interface ProductRepository {
     suspend fun decreaseStock(productId: String, quantity: Double)
     suspend fun increaseStock(productId: String, quantity: Double)
     fun getLowStockProducts(): Flow<List<Product>>
+    fun getExpiredProducts(date: Long): Flow<List<Product>>
 }
