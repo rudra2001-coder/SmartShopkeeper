@@ -96,4 +96,7 @@ data class DashboardState(
     val expiredProducts: List<Product> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null
-)
+) {
+    val quickActionCount: Int
+        get() = 8 // Fixed number or calculate based on your logic
+}
