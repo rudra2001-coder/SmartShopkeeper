@@ -49,8 +49,8 @@ fun BottomNavigationBar(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(70.dp)
-            .padding(16.dp)
+            .height(80.dp) // Increased height
+            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp) // Added bottom padding
             .clip(CircleShape)
             .background(
                 Brush.linearGradient(
@@ -75,7 +75,7 @@ fun BottomNavigationBar(
 
                 Box(
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(60.dp) // Increased size
                         .clip(CircleShape)
                         .clickable {
                             if (!isSelected) {

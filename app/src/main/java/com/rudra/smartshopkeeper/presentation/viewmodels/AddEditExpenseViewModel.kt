@@ -24,31 +24,29 @@ class AddEditExpenseViewModel @Inject constructor(
     val expense = _expense.asStateFlow()
 
     init {
-        if (expenseId != null) {
+        if (expenseId != null && expenseId != 0L) {
             viewModelScope.launch {
                 _expense.value = expenseRepository.getExpenseById(expenseId)
             }
         }
     }
 
-    fun saveExpense(category: String, amount: Double, description: String) {
-        viewModelScope.launch {
-            val expenseToSave = expense.value?.copy(
-                category = category,
-                amount = amount,
-                description = description
-            ) ?: Expense(
-                category = category,
-                amount = amount,
-                description = description,
-                date = System.currentTimeMillis()
-            )
+    suspend fun saveExpense(category: String, amount: Double, description: String) {
+        val expenseToSave = expense.value?.copy(
+            category = category,
+            amount = amount,
+            description = description
+        ) ?: Expense(
+            category = category,
+            amount = amount,
+            description = description,
+            date = System.currentTimeMillis()
+        )
 
-            if (expenseId == null) {
-                expenseRepository.insertExpense(expenseToSave)
-            } else {
-                expenseRepository.updateExpense(expenseToSave)
-            }
+        if (expenseId == null || expenseId == 0L) {
+            expenseRepository.insertExpense(expenseToSave)
+        } else {
+            expenseRepository.updateExpense(expenseToSave)
         }
     }
 }
