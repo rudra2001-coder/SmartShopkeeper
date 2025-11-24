@@ -1,8 +1,10 @@
 
 package com.rudra.smartshopkeeper.presentation.screens.sales
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,23 +12,26 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -38,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -75,24 +81,24 @@ fun NewSaleScreen(
     }
 
     Scaffold(
+        containerColor = Color(0xFF1C2532),
         topBar = {
             TopAppBar(
                 title = {
                     BengaliText(
                         text = "নতুন বিক্রয়",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "পিছনে")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "পিছনে", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent
                 )
             )
         },
@@ -141,23 +147,42 @@ fun CustomerSelectionSection(
     selectedCustomer: Customer?,
     onSelectCustomerClick: () -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0x402D3B50))
     ) {
-        if (selectedCustomer != null) {
-            BengaliText(text = "গ্রাহক: ${selectedCustomer.name}")
-        } else {
-            BengaliText(text = "গ্রাহক নির্বাচন করুন")
-        }
-        OutlinedButton(onClick = onSelectCustomerClick) {
-            BengaliText(text = "নির্বাচন")
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
+                BengaliText(
+                    text = selectedCustomer?.name ?: "গ্রাহক নির্বাচন করুন", 
+                    color = Color.White, 
+                    fontWeight = FontWeight.Bold, 
+                    fontSize = 18.sp
+                )
+                BengaliText(text = selectedCustomer?.phone ?: "", color = Color.Gray, fontSize = 14.sp)
+            }
+            Button(
+                onClick = onSelectCustomerClick,
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00D4AA))
+            ) {
+                Icon(Icons.Default.PersonAdd, contentDescription = "Select Customer", tint = Color.White)
+                Spacer(modifier = Modifier.width(8.dp))
+                BengaliText(text = "নির্বাচন", color = Color.White)
+            }
         }
     }
 }
+
 
 @Composable
 fun ProductSelectionSection(
@@ -168,7 +193,7 @@ fun ProductSelectionSection(
 ) {
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         BengaliSearchBar(query = searchQuery, onQueryChange = onSearchQueryChange)
-        LazyColumn {
+        LazyColumn(modifier = Modifier.height(200.dp)) {
             items(searchResults) { product ->
                 ProductListItem(product = product, onProductSelect = onProductSelect)
             }
@@ -178,19 +203,29 @@ fun ProductSelectionSection(
 
 @Composable
 fun ProductListItem(product: Product, onProductSelect: (Product) -> Unit) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 4.dp)
+            .clickable { onProductSelect(product) },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0x20FFFFFF))
     ) {
-        Column {
-            BengaliText(text = product.name, fontWeight = FontWeight.Bold)
-            BengaliText(text = "৳${product.salePrice}", fontSize = 14.sp)
-        }
-        Button(onClick = { onProductSelect(product) }) {
-            BengaliText(text = "যোগ করুন")
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                BengaliText(text = product.name, fontWeight = FontWeight.Bold, color = Color.White)
+                BengaliText(text = "৳${product.salePrice}", fontSize = 14.sp, color = Color.Gray)
+            }
+            IconButton(
+                onClick = { onProductSelect(product) },
+                modifier = Modifier.background(Color(0xFF00D4AA), RoundedCornerShape(8.dp))
+            ) {
+                Icon(Icons.Default.Add, contentDescription = "Add to cart", tint = Color.White)
+            }
         }
     }
 }
@@ -203,7 +238,11 @@ fun CartItemsSection(
 ) {
     LazyColumn(modifier = Modifier.padding(16.dp)) {
         items(cartItems) { cartItem ->
-            CartListItem(cartItem = cartItem, onQuantityChange = { onQuantityChange(cartItem, it) }, onRemoveItem = onRemoveItem)
+            CartListItem(
+                cartItem = cartItem, 
+                onQuantityChange = { onQuantityChange(cartItem, it) }, 
+                onRemoveItem = onRemoveItem
+            )
         }
     }
 }
@@ -214,31 +253,37 @@ fun CartListItem(
     onQuantityChange: (Double) -> Unit,
     onRemoveItem: (CartItem) -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0x402D3B50))
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            BengaliText(text = cartItem.product.name, fontWeight = FontWeight.Bold)
-            BengaliText(text = "৳${cartItem.product.salePrice}", fontSize = 14.sp)
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            IconButton(onClick = { onQuantityChange(cartItem.quantity - 1) }) {
-                Icon(Icons.Default.Remove, contentDescription = "Remove")
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                BengaliText(text = cartItem.product.name, fontWeight = FontWeight.Bold, color = Color.White)
+                BengaliText(text = "৳${cartItem.product.salePrice}", fontSize = 14.sp, color = Color.Gray)
             }
-            BengaliText(text = cartItem.quantity.toString(), modifier = Modifier.padding(horizontal = 8.dp))
-            IconButton(onClick = { onQuantityChange(cartItem.quantity + 1) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
-            }
-            IconButton(onClick = { onRemoveItem(cartItem) }) {
-                Icon(Icons.Default.Delete, contentDescription = "Remove")
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = { onQuantityChange(cartItem.quantity - 1) }) {
+                    Icon(Icons.Default.Remove, contentDescription = "Remove", tint = Color.White)
+                }
+                BengaliText(text = cartItem.quantity.toString(), modifier = Modifier.padding(horizontal = 8.dp), color = Color.White)
+                IconButton(onClick = { onQuantityChange(cartItem.quantity + 1) }) {
+                    Icon(Icons.Default.Add, contentDescription = "Add", tint = Color.White)
+                }
+                IconButton(onClick = { onRemoveItem(cartItem) }) {
+                    Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color.Red)
+                }
             }
         }
     }
 }
+
 
 @Composable
 fun SaleBottomBar(
@@ -248,27 +293,28 @@ fun SaleBottomBar(
     isSaleCompleted: Boolean,
     onPrintInvoice: () -> Unit
 ) {
-    Surface(
-        tonalElevation = 8.dp
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color(0xFF1C2532).copy(alpha = 0.8f))
+            .padding(16.dp)
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
                 BengaliText(
                     text = "মোট টাকা",
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontSize = 16.sp,
+                    color = Color.Gray
                 )
                 BengaliText(
                     text = "৳ ${"%.2f".format(totalAmount)}",
-                    fontSize = 20.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = Color.White
                 )
             }
             
@@ -276,11 +322,14 @@ fun SaleBottomBar(
                 Button(
                     onClick = onPrintInvoice,
                     modifier = Modifier.height(50.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3B82F6))
                 ) {
                     BengaliText(
                         text = "ইনভয়েস প্রিন্ট",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             } else {
@@ -288,14 +337,14 @@ fun SaleBottomBar(
                     onClick = onCompleteSale,
                     enabled = isValid,
                     modifier = Modifier.height(50.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00D4AA))
                 ) {
                     BengaliText(
                         text = "বিক্রয় সম্পন্ন",
                         fontSize = 16.sp,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     )
                 }
             }

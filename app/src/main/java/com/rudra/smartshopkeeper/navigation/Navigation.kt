@@ -15,7 +15,7 @@ import com.rudra.smartshopkeeper.presentation.screens.customers.AddEditCustomerS
 import com.rudra.smartshopkeeper.presentation.screens.customers.CustomerLedgerScreen
 import com.rudra.smartshopkeeper.presentation.screens.customers.CustomerListScreen
 import com.rudra.smartshopkeeper.presentation.screens.customers.CustomerPurchaseHistoryScreen
-import com.rudra.smartshopkeeper.presentation.screens.dashboard.DashboardScreen
+import com.rudra.smartshopkeeper.presentation.screens.DashboardScreen
 import com.rudra.smartshopkeeper.presentation.screens.expense.AddEditExpenseScreen
 import com.rudra.smartshopkeeper.presentation.screens.expense.ExpenseListScreen
 import com.rudra.smartshopkeeper.presentation.screens.expense.ExpenseReportScreen
@@ -48,11 +48,8 @@ fun Navigation() {
                     onNavigateToSales = { navController.navigate(Screen.NewSaleScreen.route) },
                     onNavigateToProducts = { navController.navigate(Screen.ProductListScreen.route) },
                     onNavigateToCustomers = { navController.navigate(Screen.CustomerListScreen.route) },
-                    onNavigateToSuppliers = { navController.navigate(Screen.SupplierListScreen.route) },
                     onNavigateToExpenses = { navController.navigate(Screen.ExpenseListScreen.route) },
-                    onNavigateToReports = { navController.navigate(Screen.ReportScreen.route) },
-                    onNavigateToAddPurchase = { navController.navigate(Screen.AddPurchaseScreen.route) },
-                    onNavigateToSaleReturn = { navController.navigate(Screen.SaleReturnScreen.route) }
+                    onNavigateToReports = { navController.navigate(Screen.ReportScreen.route) }
                 )
             }
 
@@ -145,7 +142,8 @@ fun Navigation() {
                 })
             ) { backStackEntry ->
                 AddEditSupplierScreen(
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    supplierId = backStackEntry.arguments?.getString("supplierId")
                 )
             }
 
@@ -159,7 +157,7 @@ fun Navigation() {
             composable(Screen.ExpenseListScreen.route) {
                 ExpenseListScreen(
                     onBack = { navController.popBackStack() },
-                    onAddExpense = { navController.navigate("${Screen.AddEditExpenseScreen.route}?expenseId=null") },
+                    onAddExpense = { navController.navigate("${Screen.AddEditExpenseScreen.route}?expenseId=0L") },
                     onExpenseClick = { expenseId ->
                         navController.navigate("${Screen.AddEditExpenseScreen.route}?expenseId=$expenseId")
                     },
@@ -170,12 +168,13 @@ fun Navigation() {
             composable(
                 route = "${Screen.AddEditExpenseScreen.route}?expenseId={expenseId}",
                 arguments = listOf(navArgument("expenseId") {
-                    type = NavType.StringType
-                    nullable = true
+                    type = NavType.LongType
+                    defaultValue = 0L
                 })
             ) { backStackEntry ->
                 AddEditExpenseScreen(
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    expenseId = backStackEntry.arguments?.getLong("expenseId")
                 )
             }
 

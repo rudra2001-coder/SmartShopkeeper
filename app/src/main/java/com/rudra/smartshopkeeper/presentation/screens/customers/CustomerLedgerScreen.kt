@@ -1,5 +1,7 @@
+
 package com.rudra.smartshopkeeper.presentation.screens.customers
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -10,11 +12,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -82,26 +86,25 @@ fun CustomerLedgerScreen(
     }
 
     Scaffold(
+        containerColor = Color(0xFF1C2532),
         topBar = {
             TopAppBar(
-                title = { BengaliText(text = "গ্রাহকের খাতা", fontSize = 20.sp, fontWeight = FontWeight.Bold) },
+                title = { BengaliText(text = "গ্রাহকের খাতা", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "পিছনে")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "পিছনে", tint = Color.White)
                     }
                 },
                 actions = {
                     IconButton(onClick = onNavigateToPurchaseHistory) {
-                        Icon(Icons.Default.History, contentDescription = "ক্রয় ইতিহাস", tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(Icons.Default.History, contentDescription = "ক্রয় ইতিহাস", tint = Color(0xFF00D4AA))
                     }
                     IconButton(onClick = { viewModel.exportLedger(context) }) {
-                        Icon(Icons.Default.Share, contentDescription = "এক্সপোর্ট", tint = MaterialTheme.colorScheme.onPrimary)
+                        Icon(Icons.Default.Share, contentDescription = "এক্সপোর্ট", tint = Color(0xFF00D4AA))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent
                 )
             )
         }
@@ -113,7 +116,7 @@ fun CustomerLedgerScreen(
                 .padding(16.dp)
         ) {
             if (customer == null) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = Color(0xFF00D4AA))
             } else {
                 // Customer Info and Summary
                 CustomerSummaryCard(customer!!)
@@ -122,18 +125,28 @@ fun CustomerLedgerScreen(
 
                 // Action Buttons
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Button(onClick = { showAddDueDialog = true }, modifier = Modifier.weight(1f)) {
-                        BengaliText(text = "বকেয়া যোগ")
+                    Button(
+                        onClick = { showAddDueDialog = true }, 
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3B30))
+                    ) {
+                        BengaliText(text = "বকেয়া যোগ", color = Color.White)
                     }
-                    Button(onClick = { showReceivePaymentDialog = true }, modifier = Modifier.weight(1f)) {
-                        BengaliText(text = "পেমেন্ট গ্রহণ")
+                    Button(
+                        onClick = { showReceivePaymentDialog = true }, 
+                        modifier = Modifier.weight(1f),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00D4AA))
+                    ) {
+                        BengaliText(text = "পেমেন্ট গ্রহণ", color = Color.White)
                     }
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Transaction History
-                BengaliText(text = "লেনদেনের ইতিহাস", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                BengaliText(text = "লেনদেনের ইতিহাস", fontSize = 18.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(transactions) { transaction ->
                         TransactionListItem(transaction = transaction)
@@ -148,13 +161,14 @@ fun CustomerLedgerScreen(
 fun CustomerSummaryCard(customer: Customer) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0x402D3B50))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            BengaliText(text = customer.name, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            BengaliText(text = "ফোন: ${customer.phone ?: "N/A"}")
+            BengaliText(text = customer.name, fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+            BengaliText(text = "ফোন: ${customer.phone ?: "N/A"}", color = Color.Gray)
             Spacer(modifier = Modifier.height(16.dp))
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
                 SummaryItem(title = "মোট ক্রয়", value = "৳${customer.totalPurchase}")
                 SummaryItem(title = "পেইড", value = "৳${customer.totalPaid}")
                 SummaryItem(title = "বকেয়া", value = "৳${customer.totalDue}", isDue = true)
@@ -165,13 +179,13 @@ fun CustomerSummaryCard(customer: Customer) {
 
 @Composable
 fun SummaryItem(title: String, value: String, isDue: Boolean = false) {
-    Column {
-        BengaliText(text = title, fontSize = 14.sp)
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        BengaliText(text = title, fontSize = 14.sp, color = Color.Gray)
         BengaliText(
             text = value, 
-            fontSize = 16.sp, 
+            fontSize = 18.sp, 
             fontWeight = FontWeight.Bold, 
-            color = if(isDue) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+            color = if(isDue) Color(0xFFFF3B30) else Color(0xFF00D4AA)
         )
     }
 }
@@ -189,7 +203,8 @@ fun TransactionListItem(transaction: Transaction) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0x20FFFFFF))
     ) {
         Row(
             modifier = Modifier
@@ -202,15 +217,16 @@ fun TransactionListItem(transaction: Transaction) {
                 BengaliText(
                     text = if (isPayment) "পেমেন্ট গ্রহণ" else "বকেয়া যোগ",
                     fontWeight = FontWeight.Bold,
-                    fontSize = 16.sp
+                    fontSize = 16.sp,
+                    color = Color.White
                 )
-                BengaliText(text = date, fontSize = 12.sp)
+                BengaliText(text = date, fontSize = 12.sp, color = Color.Gray)
             }
             BengaliText(
                 text = "৳${transaction.amount}",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (isPayment) Color(0xFF0C8A02) else MaterialTheme.colorScheme.error
+                color = if (isPayment) Color(0xFF00D4AA) else Color(0xFFFF3B30)
             )
         }
     }

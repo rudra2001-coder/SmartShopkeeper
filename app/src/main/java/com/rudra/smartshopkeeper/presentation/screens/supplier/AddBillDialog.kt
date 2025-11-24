@@ -1,5 +1,5 @@
 
-package com.rudra.smartshopkeeper.presentation.screens.customers
+package com.rudra.smartshopkeeper.presentation.screens.supplier
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -31,7 +31,7 @@ import com.rudra.smartshopkeeper.presentation.components.BengaliText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ReceivePaymentDialog(
+fun AddBillDialog(
     onDismiss: () -> Unit,
     onConfirm: (Double) -> Unit
 ) {
@@ -45,7 +45,7 @@ fun ReceivePaymentDialog(
             Column(
                 modifier = Modifier.padding(24.dp)
             ) {
-                BengaliText(text = "পেমেন্ট গ্রহণ করুন", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
+                BengaliText(text = "বিল যোগ করুন", fontSize = 22.sp, fontWeight = FontWeight.Bold, color = Color.White)
                 Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = amount,
@@ -66,13 +66,13 @@ fun ReceivePaymentDialog(
                 Spacer(modifier = Modifier.height(16.dp))
                 Button(
                     onClick = {
-                        val paymentAmount = amount.toDoubleOrNull()
-                        if (paymentAmount != null) {
-                            onConfirm(paymentAmount)
+                        val billAmount = amount.toDoubleOrNull()
+                        if (billAmount != null) {
+                            onConfirm(billAmount)
                         }
                     },
                     shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00D4AA)),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFFF3B30)),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     BengaliText("নিশ্চিত", color = Color.White)

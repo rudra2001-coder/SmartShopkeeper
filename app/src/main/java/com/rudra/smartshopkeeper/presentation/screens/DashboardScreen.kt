@@ -7,7 +7,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -62,7 +61,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -263,30 +261,15 @@ fun DashboardHeader(modifier: Modifier = Modifier) {
 // 💎 GLASS STAT CARD
 @Composable
 fun GlassStatCard(stat: StatData, modifier: Modifier = Modifier) {
-    var isHovered by remember { mutableStateOf(false) }
-    val elevation = animateDpAsState(
-        targetValue = if (isHovered) 16.dp else 8.dp,
-        animationSpec = tween(300)
-    )
-
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(120.dp)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        isHovered = true
-                        tryAwaitRelease()
-                        isHovered = false
-                    }
-                )
-            },
+            .height(120.dp),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0x402D3B50)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = elevation.value)
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
     ) {
         Box(
             modifier = Modifier
@@ -373,16 +356,7 @@ fun PremiumActionCard(action: PremiumAction, modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .height(92.dp)
-            .scale(scale.value)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        isPressed = true
-                        tryAwaitRelease()
-                        isPressed = false
-                    }
-                )
-            },
+            .scale(scale.value),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color(0x402D3B50)
@@ -419,8 +393,7 @@ fun PremiumActionCard(action: PremiumAction, modifier: Modifier = Modifier) {
                     text = action.text,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White,
-                    //maxLines = 2
+                    color = Color.White
                 )
             }
         }
@@ -430,27 +403,11 @@ fun PremiumActionCard(action: PremiumAction, modifier: Modifier = Modifier) {
 // 🔥 PREMIUM FLOATING ACTION BUTTON
 @Composable
 fun PremiumFAB(onClick: () -> Unit, icon: ImageVector) {
-    var isPressed by remember { mutableStateOf(false) }
-    val scale = animateFloatAsState(
-        targetValue = if (isPressed) 0.9f else 1f,
-        animationSpec = SpringSpec(dampingRatio = 0.6f, stiffness = Spring.StiffnessLow)
-    )
 
     FloatingActionButton(
         onClick = onClick,
         containerColor = Color(0xFF00D4AA),
         contentColor = Color.White,
-        modifier = Modifier
-            .scale(scale.value)
-            .pointerInput(Unit) {
-                detectTapGestures(
-                    onPress = {
-                        isPressed = true
-                        tryAwaitRelease()
-                        isPressed = false
-                    }
-                )
-            },
         shape = RoundedCornerShape(16.dp)
     ) {
         Icon(icon, contentDescription = "New Sale", modifier = Modifier.size(24.dp))

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -21,7 +22,9 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Storage
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +38,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -46,6 +50,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -75,7 +80,6 @@ fun AddEditProductScreen(
         }
     }
 
-    // Show success/error messages
     LaunchedEffect(state.saveSuccess, state.errorMessage) {
         if (state.saveSuccess) {
             scope.launch {
@@ -92,24 +96,24 @@ fun AddEditProductScreen(
     }
 
     Scaffold(
+        containerColor = Color(0xFF1C2532),
         topBar = {
             TopAppBar(
                 title = { 
                     BengaliText(
-                        text = if (productId == null) "নতুন পণ্য যোগ করুন" else "পণ্য সম্পাদনা করুন",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
+                        text = if (productId == null) "নতুন পণ্য" else "পণ্য সম্পাদনা",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
                     ) 
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "পিছনে")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "পিছনে", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = Color.Transparent
                 )
             )
         },
@@ -123,9 +127,9 @@ fun AddEditProductScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = Color(0xFF00D4AA))
                 Spacer(modifier = Modifier.height(16.dp))
-                BengaliText("লোড হচ্ছে...")
+                BengaliText("লোড হচ্ছে...", color = Color.White)
             }
         } else {
             Column(
@@ -138,7 +142,8 @@ fun AddEditProductScreen(
                 // Product Information Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0x402D3B50))
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp)
@@ -147,7 +152,7 @@ fun AddEditProductScreen(
                             text = "পণ্যের তথ্য",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = Color(0xFF00D4AA)
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
@@ -156,10 +161,10 @@ fun AddEditProductScreen(
                         OutlinedTextField(
                             value = state.name,
                             onValueChange = { viewModel.onNameChange(it) },
-                            label = { BengaliText("পণ্যের নাম *") },
+                            label = { BengaliText("পণ্যের নাম *", color = Color.Gray) },
                             modifier = Modifier.fillMaxWidth(),
                             leadingIcon = {
-                                Icon(Icons.Default.ShoppingCart, contentDescription = null)
+                                Icon(Icons.Default.ShoppingCart, contentDescription = null, tint = Color.Gray)
                             },
                             isError = state.nameError != null,
                             supportingText = {
@@ -169,7 +174,8 @@ fun AddEditProductScreen(
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                            singleLine = true
+                            singleLine = true,
+                            colors = getTextFieldColors()
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -178,11 +184,12 @@ fun AddEditProductScreen(
                         OutlinedTextField(
                             value = state.bengaliName,
                             onValueChange = { viewModel.onBengaliNameChange(it) },
-                            label = { BengaliText("বাংলা নাম") },
+                            label = { BengaliText("বাংলা নাম", color = Color.Gray) },
                             modifier = Modifier.fillMaxWidth(),
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                            singleLine = true
+                            singleLine = true,
+                            colors = getTextFieldColors()
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -200,10 +207,10 @@ fun AddEditProductScreen(
                         OutlinedTextField(
                             value = state.unit,
                             onValueChange = { viewModel.onUnitChange(it) },
-                            label = { BengaliText("একক *") },
+                            label = { BengaliText("একক *", color = Color.Gray) },
                             modifier = Modifier.fillMaxWidth(),
                             leadingIcon = {
-                                Icon(Icons.Default.Storage, contentDescription = null)
+                                Icon(Icons.Default.Storage, contentDescription = null, tint = Color.Gray)
                             },
                             isError = state.unitError != null,
                             supportingText = {
@@ -213,7 +220,8 @@ fun AddEditProductScreen(
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text, imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                            singleLine = true
+                            singleLine = true,
+                            colors = getTextFieldColors()
                         )
                     }
                 }
@@ -223,7 +231,8 @@ fun AddEditProductScreen(
                 // Pricing & Stock Card
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = MaterialTheme.shapes.medium
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0x402D3B50))
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp)
@@ -232,7 +241,7 @@ fun AddEditProductScreen(
                             text = "মূল্য ও স্টক",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.primary
+                            color = Color(0xFF00D4AA)
                         )
                         
                         Spacer(modifier = Modifier.height(16.dp))
@@ -241,10 +250,10 @@ fun AddEditProductScreen(
                         OutlinedTextField(
                             value = state.costPrice,
                             onValueChange = { viewModel.onCostPriceChange(it) },
-                            label = { BengaliText("ক্রয় মূল্য") },
+                            label = { BengaliText("ক্রয় মূল্য", color = Color.Gray) },
                             modifier = Modifier.fillMaxWidth(),
                             leadingIcon = {
-                                Icon(Icons.Default.PriceCheck, contentDescription = null)
+                                Icon(Icons.Default.PriceCheck, contentDescription = null, tint = Color.Gray)
                             },
                             isError = state.costPriceError != null,
                             supportingText = {
@@ -254,7 +263,8 @@ fun AddEditProductScreen(
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                            singleLine = true
+                            singleLine = true,
+                            colors = getTextFieldColors()
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -263,10 +273,10 @@ fun AddEditProductScreen(
                         OutlinedTextField(
                             value = state.salePrice,
                             onValueChange = { viewModel.onSalePriceChange(it) },
-                            label = { BengaliText("বিক্রয় মূল্য *") },
+                            label = { BengaliText("বিক্রয় মূল্য *", color = Color.Gray) },
                             modifier = Modifier.fillMaxWidth(),
                             leadingIcon = {
-                                Icon(Icons.Default.PriceCheck, contentDescription = null)
+                                Icon(Icons.Default.PriceCheck, contentDescription = null, tint = Color.Gray)
                             },
                             isError = state.salePriceError != null,
                             supportingText = {
@@ -276,7 +286,8 @@ fun AddEditProductScreen(
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                            singleLine = true
+                            singleLine = true,
+                            colors = getTextFieldColors()
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -285,10 +296,10 @@ fun AddEditProductScreen(
                         OutlinedTextField(
                             value = state.stockQty,
                             onValueChange = { viewModel.onStockQtyChange(it) },
-                            label = { BengaliText("বর্তমান স্টক *") },
+                            label = { BengaliText("বর্তমান স্টক *", color = Color.Gray) },
                             modifier = Modifier.fillMaxWidth(),
                             leadingIcon = {
-                                Icon(Icons.Default.Inventory, contentDescription = null)
+                                Icon(Icons.Default.Inventory, contentDescription = null, tint = Color.Gray)
                             },
                             isError = state.stockQtyError != null,
                             supportingText = {
@@ -298,7 +309,8 @@ fun AddEditProductScreen(
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
                             keyboardActions = KeyboardActions(onNext = { focusManager.moveFocus(FocusDirection.Down) }),
-                            singleLine = true
+                            singleLine = true,
+                            colors = getTextFieldColors()
                         )
 
                         Spacer(modifier = Modifier.height(12.dp))
@@ -307,17 +319,18 @@ fun AddEditProductScreen(
                         OutlinedTextField(
                             value = state.minStockAlert,
                             onValueChange = { viewModel.onMinStockAlertChange(it) },
-                            label = { BengaliText("ন্যূনতম স্টক সতর্কতা") },
+                            label = { BengaliText("ন্যূনতম স্টক সতর্কতা", color = Color.Gray) },
                             modifier = Modifier.fillMaxWidth(),
                             leadingIcon = {
-                                Icon(Icons.Default.Warning, contentDescription = null)
+                                Icon(Icons.Default.Warning, contentDescription = null, tint = Color.Gray)
                             },
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
                             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                            singleLine = true
+                            singleLine = true,
+                            colors = getTextFieldColors()
                         )
 
-                        // Profit Calculation (if both prices are available)
+                        // Profit Calculation
                         if (state.costPrice.isNotEmpty() && state.salePrice.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(12.dp))
                             val cost = state.costPrice.toDoubleOrNull() ?: 0.0
@@ -328,7 +341,7 @@ fun AddEditProductScreen(
                             BengaliText(
                                 text = "আনুমানিক লাভ: ৳${String.format("%.2f", profit)} (${String.format("%.1f", profitPercentage)}%)",
                                 fontSize = 14.sp,
-                                color = if (profit >= 0) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+                                color = if (profit >= 0) Color(0xFF00D4AA) else MaterialTheme.colorScheme.error
                             )
                         }
                     }
@@ -346,19 +359,22 @@ fun AddEditProductScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp),
-                    enabled = !state.isSaving
+                    enabled = !state.isSaving,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00D4AA))
                 ) {
                     if (state.isSaving) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(20.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = Color.White
                         )
                         Spacer(modifier = Modifier.height(8.dp))
-                        BengaliText("সেভ হচ্ছে...")
+                        BengaliText("সেভ হচ্ছে...", color = Color.White)
                     } else {
                         BengaliText(
                             text = if (productId == null) "পণ্য সংরক্ষণ করুন" else "পরিবর্তনগুলি সংরক্ষণ করুন",
-                            fontSize = 16.sp
+                            fontSize = 16.sp, 
+                            color = Color.White
                         )
                     }
                 }
@@ -385,7 +401,7 @@ fun CategoryDropdown(
         OutlinedTextField(
             value = selectedCategory,
             onValueChange = { },
-            label = { BengaliText("ক্যাটাগরি") },
+            label = { BengaliText("ক্যাটাগরি", color = Color.Gray) },
             modifier = Modifier
                 .fillMaxWidth()
                 .menuAnchor(),
@@ -393,7 +409,7 @@ fun CategoryDropdown(
             trailingIcon = {
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded.value)
             },
-            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors()
+            colors = getTextFieldColors()
         )
 
         ExposedDropdownMenu(
@@ -412,3 +428,15 @@ fun CategoryDropdown(
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun getTextFieldColors() = TextFieldDefaults.colors(
+    focusedTextColor = Color.White,
+    unfocusedTextColor = Color.White,
+    cursorColor = Color(0xFF00D4AA),
+    focusedIndicatorColor = Color(0xFF00D4AA),
+    unfocusedIndicatorColor = Color.Gray,
+    focusedContainerColor = Color(0x20FFFFFF),
+    unfocusedContainerColor = Color(0x20FFFFFF)
+)
